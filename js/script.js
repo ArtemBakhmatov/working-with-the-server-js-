@@ -11,7 +11,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
         ///////////////// с функцией getResource /////////////////////
         getResource('http://localhost:3000/people')
-            .then(data => createCards(data))
+            .then(data => createCards(data.data))
             .catch(err => console.error(err));
 
         //this.remove(); // удаляется кнопка
@@ -20,14 +20,14 @@ window.addEventListener('DOMContentLoaded', () => {
     document.querySelector('button').addEventListener('click', request, {"once": true});
 
     async function getResource(url) { // Получить ресурс
-        const responce = await fetch(`${url}`);
+        const responce = await axios(`${url}`);
 
-        if (!responce.ok) {  // если ошибка 
+        if (responce.status !== 200) {  // если ошибка 
             throw new Error(`Could not fetch ${url}, status: ${responce.status}`);
         }
-        return await responce.json(); // возращаем асинхронный ответ в формате JS (Обычный объект)
+        return responce; // возращаем асинхронный ответ в формате JS (Обычный объект)
     }
-    
+
     // async -> это означает что внутри функции есть асинхронная операция
     // await -> это означате какая имеенно асинхронная операция
     // throw -> инструкции после throw не будут выполнены
