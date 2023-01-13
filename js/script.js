@@ -11,21 +11,27 @@ window.addEventListener('DOMContentLoaded', () => {
         formData.forEach((value, key) => {
             object[key] = value;
         });
-        let json = JSON.stringify(object);    // конвертирует из JS в JSON (Объект)
-        const request = new XMLHttpRequest(); // объект осинхронно дает общаться с сервером
-        request.open('POST', 'http://localhost:3000/people'); // Настройка запроса ('отправить', 'адрес')
-        request.setRequestHeader('Content-type', 'application/json; charset=utf-8'); // (тип, формат)
-        request.send(json); // отправить запрос
-
-        request.addEventListener('load', () => { 
-            if (request.status == 200) {
-                let data = JSON.parse(request.response); 
-                console.log(data);
-            } else {
-                console.error('Что-то пошло не так!');
-            }
-        });  
+        
+        getResource('http://localhost:3000/people', object)
+            .then(data => console.log(data))
+            .catch(err => console.error(err));
+        
     }
     form.addEventListener('submit', (event) => request(event), {"once": true});
     // {"once": true} -> обработчик сработае только один раз  
+
+    async function getResource(url, data) { // Получить ресурс
+        const responce = await fetch(`${url}`, {
+            method: 'POST',
+            headers: {
+                'Content-type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+
+        if (responce.status !== 200) {  // если ошибка 
+            throw new Error(`Could not fetch ${url}, status: ${responce.status}`);
+        }
+        return await responce.json(); // возращаем асинхронный ответ в формате JS (Обычный объект)
+    }
 });
