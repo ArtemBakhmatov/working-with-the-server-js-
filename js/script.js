@@ -7,24 +7,24 @@ window.addEventListener('DOMContentLoaded', () => {
 
         let formData = new FormData(form);      // объект: ключ -> значение
         
-        const request = new XMLHttpRequest(); // объект осинхронно дает общаться с сервером
-        request.open('POST', './api.php'); // Настройка запроса ('отправить', 'адрес')
-        //request.setRequestHeader('Content-type', 'multipart/form-data'); // (тип, формат)
-        // Если есть new XMLHttpRequest() и new FormData(), то setRequestHeader не нужен
-        request.send(formData); // отправить запрос
-
-        request.addEventListener('load', () => { 
-            if (request.status == 200) {
-                console.log(request.response);
-            } else {
-                console.error('Что-то пошло не так!');
-            }
-        });  
-
-        //axios.post('http://localhost:3000/people', object);
-        
+        getResource('./api.php', formData)
+            .then(data => console.log(data))
+            .catch(err => console.error(err));    
     }
     form.addEventListener('submit', (event) => request(event), {"once": true});
     // {"once": true} -> обработчик сработае только один раз  
+
+    async function getResource(url, data) { // Получить ресурс
+        const responce = await fetch(`${url}`, {
+            method: 'POST',
+            body: data
+            // Если есть new XMLHttpRequest() и new FormData(), то headers не нужен
+        });
+
+        if (responce.status !== 200) {  // если ошибка 
+            throw new Error(`Could not fetch ${url}, status: ${responce.status}`);
+        }
+        return await responce.text(); // возращаем асинхронный ответ 
+    }
 
 });
