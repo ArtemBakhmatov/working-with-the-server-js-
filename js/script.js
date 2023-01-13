@@ -1,63 +1,31 @@
 "use strict";
 
 window.addEventListener('DOMContentLoaded', () => {
-    function request() {                      // запрос()
-        ///////////////// без функции getResource /////////////////////
-        /* fetch('http://localhost:3000/people')    // Запрос на указанный адрес
-            .then(data => data.json())              // Конвертируем из JSON в JS
-            .then(data => createCards(data))        // Выводим результат
-            .catch(err => console.error(err));      // Сработает только при ошибке
-             */
+    const form = document.querySelector('form');
+    function request(event) {                      // запрос()
+        event.preventDefault(); // отменить стандартное поведение браузера
 
-        ///////////////// с функцией getResource /////////////////////
-        getResource('http://localhost:3000/people')
-            .then(data => createCards(data.data))
-            .catch(err => console.error(err));
-
-        //this.remove(); // удаляется кнопка
-        document.querySelector('button').remove(); // удаляется кнопка
-    }
-    document.querySelector('button').addEventListener('click', request, {"once": true});
-
-    async function getResource(url) { // Получить ресурс
-        const responce = await axios(`${url}`);
-
-        if (responce.status !== 200) {  // если ошибка 
-            throw new Error(`Could not fetch ${url}, status: ${responce.status}`);
-        }
-        return responce; // возращаем асинхронный ответ в формате JS (Обычный объект)
-    }
-
-    // async -> это означает что внутри функции есть асинхронная операция
-    // await -> это означате какая имеенно асинхронная операция
-    // throw -> инструкции после throw не будут выполнены
-
-    function createCards(response) {  // создать карточки
-        response.forEach(item => {
-            let card = document.createElement('div');
-            card.classList.add('card');
-
-            let icon;
-            if (item.sex === 'male') {
-                icon = "icons/mars.png";
-            } else {
-                icon = "icons/female.png";
-            }
-
-            card.innerHTML = `
-                <img src="${item.photo}" alt="">
-                <div class="name">${item.name} ${item.surname}</div>
-                <div class="sex">
-                    <img src=${icon} alt="male">
-                </div>
-                <div class="age">${item.age}</div>
-            `;
-            document.querySelector('.app').append(card);
+        let formData = new FormData(form);      // объект: ключ -> значение
+        formData.append('id', Math.random());   // добавляем в объект новую пару (ключ: значение)
+        let object = {};                        // пустой объект
+        formData.forEach((value, key) => {
+            object[key] = value;
         });
+        let json = JSON.stringify(object);    // конвертирует из JS в JSON (Объект)
+        const request = new XMLHttpRequest(); // объект осинхронно дает общаться с сервером
+        request.open('POST', 'http://localhost:3000/people'); // Настройка запроса ('отправить', 'адрес')
+        request.setRequestHeader('Content-type', 'application/json; charset=utf-8'); // (тип, формат)
+        request.send(json); // отправить запрос
+
+        request.addEventListener('load', () => { 
+            if (request.status == 200) {
+                let data = JSON.parse(request.response); 
+                console.log(data);
+            } else {
+                console.error('Что-то пошло не так!');
+            }
+        });  
     }
-
-
-    // {"once": true} -> обработчик сработае только один раз
-
-     
+    form.addEventListener('submit', (event) => request(event), {"once": true});
+    // {"once": true} -> обработчик сработае только один раз  
 });
