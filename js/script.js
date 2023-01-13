@@ -7,9 +7,13 @@ window.addEventListener('DOMContentLoaded', () => {
 
         let formData = new FormData(form);      // объект: ключ -> значение
         
-        getResource('./api.php', formData)
-            .then(data => console.log(data))
-            .catch(err => console.error(err));    
+        axios({
+            method: 'post',
+            url: './api.php',
+            data: formData,
+            //Headers: {'content-type': 'multipart/form-data'} // необзятелен всеравно будет работать
+        })
+        .then(data => console.log(data.data));
     }
     form.addEventListener('submit', (event) => request(event), {"once": true});
     // {"once": true} -> обработчик сработае только один раз  
